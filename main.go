@@ -10,21 +10,23 @@ import (
 	"strings"
 )
 
+func builtinHeaders() []string {
+	return []string{"problem", "steps", "facts", "questions", "theories"}
+}
+
 type row struct {
 	indent  int
 	content string
-	tags    []string
+	header  string
 }
 
 type model struct {
 	title    string // TODO: Display title at the top
-	items    map[int]row
+	items    map[string][]row
 	viewport viewport.Model
 	textarea textarea.Model
 	ready    bool
 }
-
-var builtinTags = []string{"problem", "steps", "facts", "questions"}
 
 func initialModel() model {
 	ta := textarea.New()
@@ -42,11 +44,13 @@ func initialModel() model {
 
 	initModel := model{
 		textarea: ta,
-		items: map[int]row{
-			0: {indent: 0, content: "An idea!", tags: []string{"idea", "new stuff"}},
-			1: {indent: 1, content: "Step 1: Do something", tags: []string{"step"}},
-			2: {indent: 2, content: "Step 1.1: And then some", tags: []string{"step"}},
-			3: {indent: 1, content: "Step 2: Continue", tags: []string{"step"}},
+		items: map[string][]row{
+			"questions": {row{indent: 0, content: "An idea!", header: "questions"}},
+			"steps": {
+				row{indent: 1, content: "Step 1: Do something", header: "steps"},
+				row{indent: 2, content: "Step 1.1: And then some", header: "steps"},
+				row{indent: 1, content: "Step 2: Continue", header: "steps"},
+			},
 		},
 	}
 
@@ -72,7 +76,8 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case tea.KeyEnter:
 			newRow := makeNewRow(m)
-			m.items[len(m.items)] = newRow
+			headerRows := m.items[newRow.header]
+			headerRows = append(headerRows, newRow)
 			m.viewport.SetContent(renderContent(m))
 			m.textarea.Reset()
 			m.viewport.GotoBottom()
@@ -99,45 +104,40 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 func makeNewRow(m model) row {
 	rn := []rune(m.textarea.Value())
-	tagStart := -1
+	hIndex := -1
 	for i := 0; i < len(rn); i++ {
 		if rn[i] == '#' {
-			tagStart = i
+			hIndex = i
 			break
 		}
 	}
 	var (
-		tagsSection []rune
-		tags        []string
-		content     string
+		header  []rune
+		content string
 	)
-	if tagStart > -1 {
-		tagsSection = rn[tagStart:]
-		tags = strings.Split(string(tagsSection), "#")
-		content = string(rn[0 : tagStart-1])
+	if hIndex > -1 {
+		header = rn[hIndex:]
 	} else {
-		// No tags
-		tags = []string{}
+		// No header
 		content = m.textarea.Value()
 	}
 	newRow := row{
 		indent:  0,
 		content: content,
-		tags:    tags,
+		header:  string(header),
 	}
 	return newRow
 }
 
 func renderContent(m model) string {
 	s := ""
-	for i := 0; i < len(m.items); i++ {
-		item := m.items[i]
-		tags := []string{}
-		for _, t := range item.tags {
-			tags = append(tags, "#"+t)
+	for j := 0; j < len(builtinHeaders()); j++ {
+		header := builtinHeaders()[j]
+		for i := 0; i < len(m.items[header]); i++ {
+			row := m.items[header][i]
+			indent := strings.Repeat("  ", row.indent)
+			s += fmt.Sprintf("%s%s %s\n", indent, row.content, row.header)
 		}
-		indent := strings.Repeat("  ", item.indent)
-		s += fmt.Sprintf("%s%s %s\n", indent, item.content, strings.Join(tags, " "))
 	}
 
 	return s

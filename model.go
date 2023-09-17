@@ -5,7 +5,9 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
+
 	"strings"
 )
 
@@ -111,7 +113,12 @@ func renderContent(m model) string {
 		s += "\n"
 	}
 
-	return s
+	out, err := glamour.Render(s, "dark")
+	if err != nil {
+		return "Error"
+	}
+
+	return out
 }
 
 func (m model) View() string {

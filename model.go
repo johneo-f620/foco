@@ -72,25 +72,19 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func makeNewRow(m model) row {
-	rn := []rune(m.Textarea.Value())
-	hIndex := -1
-	for i := 0; i < len(rn); i++ {
-		if rn[i] == '#' {
-			hIndex = i
-			break
-		}
-	}
+	value := m.Textarea.Value()
+	hi := strings.LastIndexByte(value, '#')
+
 	var (
 		header  string
 		content string
 	)
-	if hIndex > -1 {
-		header = string(rn[hIndex:])
-		content = string(rn[0:hIndex])
+	if hi > -1 {
+		content = value[0:hi]
+		header = value[hi+1:]
 	} else {
-		// No header
+		content = value
 		header = "facts"
-		content = m.Textarea.Value()
 	}
 	newRow := row{
 		Indent:  0,

@@ -17,9 +17,17 @@ I need more structure than a text file but less features (i.e., distractions) th
 
 - [x] Restructure the model and initModel to group by #heading
 - [x] Change the rendering to group by #heading
+- [ ] Implement indentation
+- [ ] LARGE: Update/delete (UX undefined)
+- [ ] Save to disk
+- [ ] Commands (e.g. /goto, /find, etc.)
+- [ ] Metadata?
 
 ## TODOs
 
+- [ ] tab or shift+tab in the entry field to indent/dedent
+- [ ] Up/down arrows for seleting for edit or delete?
+  - I might accidentally lose changes while just trying to move the cursor?
 - [x] BUG: No notes display on open (cut off by extra `\n`'s)
 - [x] REFACTOR: Model data structure -- map with key of tags/headers, with line numbers (indicated by slice index?) and indents
   - Question: How do I indent when a row is under multiple headings?
@@ -28,4 +36,4 @@ I need more structure than a text file but less features (i.e., distractions) th
 - [x] BUG: Initial text entry does not show, but it does from the second entry
 - [x] BUG: Empty tag hash shows (off by 1 error from the string split?)
 - [x] Show indentation in the text entry
-- [x] Remeber the previous row's heading so that the next ones can go under the same
+- [x] Remember the previous row's heading so that the next ones can go under the same
